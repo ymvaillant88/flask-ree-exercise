@@ -15,6 +15,9 @@ matplotlib.pyplot.switch_backend('Agg')
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Credenciales de la BD
+dbConnection = "postgresql://postgres:82KJupjhV5wQABBBSpHP@containers-us-west-125.railway.app:7869/railway"
+
 
 def string_to_timestamp(string):
     return datetime.strptime(string, "%Y-%m-%dT%H:%M")
@@ -153,7 +156,7 @@ def get_demand():
                 df = pd.DataFrame(demand, columns=['datetime', 'demand'])
 
                 if df.shape[0] > 0:
-                    engine = create_engine(os.getenv("DB_CONNECTION"))
+                    engine = create_engine(os.getenv("DB_CONNECTION", default=dbConnection))
 
                     if engine:
                         query = f"SELECT * FROM demand WHERE datetime >= '{string_to_timestamp(start_date)}' AND datetime <= '{string_to_timestamp(end_date)}'"
@@ -209,7 +212,7 @@ def get_db_data():
             formatOK = False
 
         if formatOK:
-            engine = create_engine(os.getenv("DB_CONNECTION"))
+            engine = create_engine(os.getenv("DB_CONNECTION", default=dbConnection))
 
             if engine:
                 query = f"SELECT * FROM demand WHERE datetime >= '{string_to_timestamp(start_date)}' and datetime <= '{string_to_timestamp(end_date)}'"
@@ -239,7 +242,7 @@ def wipe_data():
     if 'secret' in request.args:
         secret = request.args['secret']
         if secret == '1234':
-            engine = create_engine(os.getenv("DB_CONNECTION"))
+            engine = create_engine(os.getenv("DB_CONNECTION", default=dbConnection))
             # Crear una conexión
             with engine.connect() as connection:
                 query = "DELETE FROM demand"
