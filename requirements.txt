@@ -1,0 +1,12 @@
+Flask==2.3.2
+matplotlib==3.7.1
+plotly==5.14.1
+numpy==1.24.3
+pandas==2.0.1
+postgres==4.0
+psycopg2==2.9.6
+psycopg2-binary==2.9.6
+psycopg2-pool==1.1
+requests==2.30.0
+SQLAlchemy==2.0.14
+flask_cors==3.0.10
