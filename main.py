@@ -7,8 +7,7 @@ from sqlalchemy import create_engine
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import plotly.express as px
-from flask_cors import CORS         # Para permitir peticiones desde cualquier origen
-
+from flask_cors import CORS  # Para permitir peticiones desde cualquier origen
 
 matplotlib.pyplot.switch_backend('Agg')
 
@@ -19,11 +18,13 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 def string_to_timestamp(string):
     return datetime.strptime(string, "%Y-%m-%dT%H:%M")
 
+
 def string_to_timestamp2(fecha_str):
     fecha_str_sin_milisegundos = fecha_str.split(".")[0]  # Eliminamos los milisegundos
     fecha_str_sin_zona_horaria = fecha_str_sin_milisegundos.split("+")[
         0]  # Eliminamos la información de la zona horaria
     return datetime.strptime(fecha_str_sin_zona_horaria, "%Y-%m-%dT%H:%M:%S")
+
 
 def validate_form(start_date, end_date, orientation, chart_type):
     try:
@@ -49,6 +50,7 @@ def validate_form(start_date, end_date, orientation, chart_type):
                 return True, "OK"
     except ValueError:
         return False, "El formato de las fechas no es correcto: YYYY-MM-DDTHH:MM"
+
 
 def get_chart(chart_type, orientation, df_BD):
     if chart_type == 'line':
@@ -119,6 +121,7 @@ def get_chart(chart_type, orientation, df_BD):
     # Devolver el gráfico como respuesta
     return send_file(buffer, mimetype='image/png')
 
+
 # ENDPOINT 1
 @app.route('/get_demand', methods=['GET'])
 def get_demand():
@@ -140,7 +143,7 @@ def get_demand():
                 attributes = include[0].get('attributes')
                 values = attributes.get('values')
                 demand = [(string_to_timestamp2(value.get('datetime')), value.get('value')) for value in
-                        values]
+                          values]
                 df = pd.DataFrame(demand, columns=['datetime', 'demand'])
 
                 if df.shape[0] > 0:
@@ -172,9 +175,10 @@ def get_demand():
                 else:
                     return "No hay datos de demanda en la Red Eléctrica de España para el rango de fechas dado"
         else:
-            return msg              # msg: mensaje de error de la función validate_form (línea 11)
+            return msg  # msg: mensaje de error de la función validate_form (línea 11)
     else:
         return "Faltan parámetros en la consulta: debe de incluir start_date, end_date, orientation y chart_type"
+
 
 # ENDPOINT 2:
 @app.route('/get_db_data', methods=['GET'])
@@ -224,6 +228,7 @@ def get_db_data():
     else:
         return "No se han proporcionado las fechas de inicio y fin"
 
+
 # ENDPOINT 3:
 @app.route('/wipe_data', methods=['DELETE'])
 def wipe_data():
@@ -244,4 +249,4 @@ def wipe_data():
         return "No se ha proporcionado la contraseña: Argumento secret"
 
 
-app.run(debug=True)
+app.run(host='0.0.0.0', port=8080, debug=True)
