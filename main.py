@@ -1,6 +1,5 @@
 import io
 import os
-
 import matplotlib
 from flask import Flask, request, jsonify, send_file
 import requests as requests
@@ -256,4 +255,5 @@ def wipe_data():
         return "No se ha proporcionado la contraseña: Argumento secret"
 
 
-app.run(host='0.0.0.0', port=os.getenv("PORT", default=5000), debug=True)
+if __name__ == '__main__':
+    app.run(debug=True, port=os.getenv("PORT", default=5000))
