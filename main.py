@@ -122,6 +122,11 @@ def get_chart(chart_type, orientation, df_BD):
     return send_file(buffer, mimetype='image/png')
 
 
+@app.route('/', methods=['GET'])
+def index():
+    return "API de datos de demanda de energía eléctrica en España"
+
+
 # ENDPOINT 1
 @app.route('/get_demand', methods=['GET'])
 def get_demand():
