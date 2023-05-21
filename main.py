@@ -1,14 +1,15 @@
 import io
 import os
 import matplotlib
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template, Response
 import requests as requests
 import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import plotly.express as px
-from flask_cors import CORS  # Para permitir peticiones desde cualquier origen
+from flask_cors import CORS
+import base64
 
 matplotlib.pyplot.switch_backend('Agg')
 
@@ -56,74 +57,107 @@ def validate_form(start_date, end_date, orientation, chart_type):
         return False, "El formato de las fechas no es correcto: YYYY-MM-DDTHH:MM"
 
 
-def get_chart(chart_type, orientation, df_BD):
-    if chart_type == 'line':
-        if orientation == 'v':
-            fig = px.line(df_BD, x='datetime', y='demand', orientation='v')
-            fig.update_layout(
-                title="Demanda de energía eléctrica en España",
-                xaxis_title="Fecha",
-                yaxis_title="Demanda (MW)",
-                font=dict(
-                    family="Courier New, monospace",
-                    size=18,
-                    color="#7f7f7f"
-                )
-            )
-            fig.show()
-        elif orientation == 'h':
-            fig = px.line(df_BD, x='demand', y='datetime', orientation='h')
-            fig.update_layout(
-                title="Demanda de energía eléctrica en España",
-                xaxis_title="Demanda (MW)",
-                yaxis_title="Fecha",
-                font=dict(
-                    family="Courier New, monospace",
-                    size=18,
-                    color="#7f7f7f"
-                )
-            )
-            fig.show()
-        else:
-            return "La orientación debe ser vertical u horizontal"
-    elif chart_type == 'bar':
-        if orientation == 'v':
-            fig = px.bar(df_BD, x='datetime', y='demand', orientation='v')
-            fig.update_layout(
-                title="Demanda de energía eléctrica en España",
-                xaxis_title="Fecha",
-                yaxis_title="Demanda (MW)",
-                font=dict(
-                    family="Courier New, monospace",
-                    size=18,
-                    color="#7f7f7f"
-                )
-            )
-            fig.show()
-        elif orientation == 'h':
-            fig = px.bar(df_BD, x='demand', y='datetime', orientation='h')
-            fig.update_layout(
-                title="Demanda de energía eléctrica en España",
-                xaxis_title="Demanda (MW)",
-                yaxis_title="Fecha",
-                font=dict(
-                    family="Courier New, monospace",
-                    size=18,
-                    color="#7f7f7f"
-                )
-            )
-            fig.show()
-        else:
-            return "La orientación debe ser vertical u horizontal"
-    else:
-        return "El tipo de gráfico debe ser line o bar"
-        # Guardar el gráfico en un objeto BytesIO
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
+def get_line_chart_vertical(df):
+    fig = px.line(df, x='datetime', y='demand', title='Demanda de energía eléctrica en España')
+    fig.update_xaxes(title_text='Fecha')
+    fig.update_yaxes(title_text='Demanda')
+    fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        margin=dict(
+            l=50,
+            r=50,
+            b=100,
+            t=100,
+            pad=4
+        ),
+        paper_bgcolor="LightSteelBlue",
+    )
+    fig.update_traces(mode='markers+lines')
+    output = io.BytesIO()
+    fig.write_image(output, format='png')
+    return Response(output.getvalue(), mimetype='image/png')
 
-    # Devolver el gráfico como respuesta
-    return send_file(buffer, mimetype='image/png')
+
+def get_line_chart_horizontal(df):
+    fig = px.line(df, x='demand', y='datetime', title='Demanda de energía eléctrica en España')
+    fig.update_xaxes(title_text='Demanda')
+    fig.update_yaxes(title_text='Fecha')
+    fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        margin=dict(
+            l=50,
+            r=50,
+            b=100,
+            t=100,
+            pad=4
+        ),
+        paper_bgcolor="LightSteelBlue",
+    )
+    fig.update_traces(mode='markers+lines')
+    output = io.BytesIO()
+    fig.write_image(output, format='png')
+    return Response(output.getvalue(), mimetype='image/png')
+
+
+def get_bar_chart_vertical(df):
+    fig = px.bar(df, x='datetime', y='demand', title='Demanda de energía eléctrica en España')
+    fig.update_xaxes(title_text='Fecha')
+    fig.update_yaxes(title_text='Demanda')
+    fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        margin=dict(
+            l=50,
+            r=50,
+            b=100,
+            t=100,
+            pad=4
+        ),
+        paper_bgcolor="LightSteelBlue",
+    )
+    output = io.BytesIO()
+    fig.write_image(output, format='png')
+    return Response(output.getvalue(), mimetype='image/png')
+
+
+def get_bar_chart_horizontal(df):
+    fig = px.bar(df, x='demand', y='datetime', title='Demanda de energía eléctrica en España')
+    fig.update_xaxes(title_text='Demanda')
+    fig.update_yaxes(title_text='Fecha')
+    fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        margin=dict(
+            l=50,
+            r=50,
+            b=100,
+            t=100,
+            pad=4
+        ),
+        paper_bgcolor="LightSteelBlue",
+    )
+    output = io.BytesIO()
+    fig.write_image(output, format='png')
+    return Response(output.getvalue(), mimetype='image/png')
+
+
+def get_chart(chart_type, orientation, df_BD):
+    if chart_type == "line":
+        if orientation == "v":
+            return get_line_chart_vertical(df_BD)
+        else:
+            return get_line_chart_horizontal(df_BD)
+    else:
+        if orientation == "v":
+            return get_bar_chart_vertical(df_BD)
+        else:
+            return get_bar_chart_horizontal(df_BD)
 
 
 @app.route('/', methods=['GET'])
@@ -256,4 +290,4 @@ def wipe_data():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=os.getenv("PORT", default=5000))
+    app.run(host="0.0.0.0", debug=False, port=os.getenv("PORT", default=3005))
