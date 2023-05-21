@@ -154,7 +154,7 @@ def get_demand():
 
                 if df.shape[0] > 0:
                     engine = create_engine(
-                        'postgresql://postgres:W6YM6XkDKZbvG9QLMEJ6@containers-us-west-10.railway.app:5761/railway')
+                        'postgresql://postgres:82KJupjhV5wQABBBSpHP@containers-us-west-125.railway.app:7869/railway')
 
                     if engine:
                         query = f"SELECT * FROM demand WHERE datetime >= '{string_to_timestamp(start_date)}' AND datetime <= '{string_to_timestamp(end_date)}'"
@@ -211,7 +211,7 @@ def get_db_data():
 
         if formatOK:
             engine = create_engine(
-                'postgresql://postgres:W6YM6XkDKZbvG9QLMEJ6@containers-us-west-10.railway.app:5761/railway')
+                'postgresql://postgres:82KJupjhV5wQABBBSpHP@containers-us-west-125.railway.app:7869/railway')
 
             if engine:
                 query = f"SELECT * FROM demand WHERE datetime >= '{string_to_timestamp(start_date)}' and datetime <= '{string_to_timestamp(end_date)}'"
@@ -242,7 +242,7 @@ def wipe_data():
         secret = request.args['secret']
         if secret == '1234':
             engine = create_engine(
-                'postgresql://postgres:W6YM6XkDKZbvG9QLMEJ6@containers-us-west-10.railway.app:5761/railway')
+                'postgresql://postgres:82KJupjhV5wQABBBSpHP@containers-us-west-125.railway.app:7869/railway')
             # Crear una conexión
             with engine.connect() as connection:
                 query = "DELETE FROM demand"
